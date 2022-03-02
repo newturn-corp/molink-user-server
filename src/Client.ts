@@ -32,14 +32,13 @@ export class Client {
         document.socketMap.set(this.socket, new Set())
 
         if (isNew) {
-            // 특정 Document에 대한 저장된 Update를 싹 다 가져옴
-            let hierarchy = await UserInfoRepo.getUserInfo(this.userId)
-            if (!hierarchy) {
-                hierarchy = new Y.Doc()
-                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(hierarchy))
+            let user = await UserInfoRepo.getUserInfo(this.userId)
+            if (!user) {
+                user = new Y.Doc()
+                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(user))
             }
 
-            Y.applyUpdate(document, Y.encodeStateAsUpdate(hierarchy))
+            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
         }
 
         this.pingInterval = setInterval(() => {
