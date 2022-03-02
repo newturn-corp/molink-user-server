@@ -29,6 +29,7 @@ export class SocketServer {
             console.log(`${req.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${req.headers['user-agent']}`)
             const id = this.authUser(req)
             if (!id) {
+                console.log(`${req.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] auth fail ${req.headers['user-agent']}`)
                 return
             }
 
