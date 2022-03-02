@@ -45,7 +45,6 @@ export class MainController {
             if (encoding.length(encoder) > 1) {
                 document.send(this.client.socket, encoding.toUint8Array(encoder))
             }
-
             break
         }
         case MessageType.MessageAwareness: {
