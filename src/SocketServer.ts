@@ -9,18 +9,20 @@ import { JWTUser } from '@newturn-develop/types-molink'
 import UserRepo from './Repositories/UserRepo'
 import moment from 'moment-timezone'
 
-export class SocketServer {
+class SocketServer {
     nodeId: string
-    httpServer: http.Server
-    server: WebSocketServer
+    httpServer: http.Server | null = null
+    server: WebSocketServer | null = null
+    isBlockTraffic: boolean = false
+    clientMap: Map<string, Client> = new Map<string, Client>()
 
-    constructor (httpServer: http.Server) {
+    constructor () {
         this.nodeId = uuidV4()
-        this.server = new WebSocketServer({ noServer: true })
-        this.httpServer = httpServer
     }
 
-    start () {
+    start (httpServer: http.Server) {
+        this.server = new WebSocketServer({ noServer: true })
+        this.httpServer = httpServer
         this.server.on('connection', async (socket, request) => {
             console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${request.headers['user-agent']}`)
             await this.handleConnect(socket, request)
@@ -33,9 +35,9 @@ export class SocketServer {
                 return
             }
 
-            this.server.handleUpgrade(req, socket, head, (ws) => {
+            this.server?.handleUpgrade(req, socket, head, (ws) => {
                 req.headers.userId = id.toString()
-                this.server.emit('connection', ws, req)
+                this.server?.emit('connection', ws, req)
             })
         })
         this.httpServer.listen(env.port, env.host, () => {
@@ -65,6 +67,20 @@ export class SocketServer {
         const user = await UserRepo.getActiveUserById(userId)
         const client = new Client(socket, request)
         await client.init()
-        console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] connect ${user?.id} ${user?.nickname} ${request.headers['user-agent']}`)
+        this.clientMap.set(client.id, client)
+        console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} connect ${user?.id} ${user?.nickname} ${request.headers['user-agent']}`)
+    }
+
+    async handleDisconnect (clientId: string) {
+        this.clientMap.delete(clientId)
+    }
+
+    stop () {
+        this.isBlockTraffic = true
+        const clients = this.clientMap.values()
+        for (const client of clients) {
+            client.socket.close()
+        }
     }
 }
+export default new SocketServer()

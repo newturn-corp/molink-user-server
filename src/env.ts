@@ -32,7 +32,8 @@ const env = {
         token: process.env.SLACK_BOT_TOKEN!
     },
     secret: {
-        cookie: process.env.COOKIE_SECRET!
+        cookie: process.env.COOKIE_SECRET!,
+        blockTrafficKey: process.env.BLOCK_TRAFFIC_KEY!
     },
     jwt: process.env.JWT_SECRET!
 }
