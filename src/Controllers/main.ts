@@ -9,6 +9,13 @@ import CacheService from '../Services/CacheService'
 import { SharedDocument } from '../Domain/SharedDocument'
 import moment from "moment-timezone";
 import SocketServer from "../SocketServer";
+import {
+    messageYjsSyncStep1,
+    messageYjsSyncStep2,
+    messageYjsUpdate,
+    readSyncStep1,
+    readSyncStep2, readUpdate
+} from "y-protocols/sync";
 
 export class MainController {
     client: Client
@@ -42,9 +49,7 @@ export class MainController {
         switch (messageType) {
         case MessageType.MessageSync: {
             encoding.writeVarUint(encoder, MessageType.MessageSync)
-            const messageType = decoding.readVarUint(decoder)
-            console.log(messageType)
-            syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
+            readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
                 document.send(this.client.socket, encoding.toUint8Array(encoder))
@@ -60,4 +65,24 @@ export class MainController {
         default: throw new Error('unreachable')
         }
     }
+}
+
+export const readSyncMessage = (decoder: any, encoder: any, doc: any, transactionOrigin: any) => {
+    const messageType = decoding.readVarUint(decoder)
+    console.log(messageType)
+    console.log(transactionOrigin)
+    switch (messageType) {
+        case messageYjsSyncStep1:
+            readSyncStep1(decoder, encoder, doc)
+            break
+        case messageYjsSyncStep2:
+            readSyncStep2(decoder, doc, transactionOrigin)
+            break
+        case messageYjsUpdate:
+            readUpdate(decoder, doc, transactionOrigin)
+            break
+        default:
+            throw new Error('Unknown message type')
+    }
+    return messageType
 }
