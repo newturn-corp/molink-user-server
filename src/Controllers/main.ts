@@ -69,8 +69,8 @@ export class MainController {
 
 export const readSyncMessage = (decoder: any, encoder: any, doc: any, transactionOrigin: any) => {
     const messageType = decoding.readVarUint(decoder)
+    console.log('read-sync-message')
     console.log(messageType)
-    console.log(transactionOrigin)
     switch (messageType) {
         case messageYjsSyncStep1:
             readSyncStep1(decoder, encoder, doc)
