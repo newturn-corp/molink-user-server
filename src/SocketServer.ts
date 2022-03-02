@@ -7,6 +7,7 @@ import { parseCookie } from '@newturn-develop/molink-utils'
 import jwt from 'jsonwebtoken'
 import { JWTUser } from '@newturn-develop/types-molink'
 import UserRepo from './Repositories/UserRepo'
+import moment from 'moment-timezone'
 
 export class SocketServer {
     nodeId: string
@@ -21,10 +22,11 @@ export class SocketServer {
 
     start () {
         this.server.on('connection', async (socket, request) => {
-            this.handleConnect(socket, request)
-            // await setupWSConnection(ws, req);
+            console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${request.headers['user-agent']}`)
+            await this.handleConnect(socket, request)
         })
         this.httpServer.on('upgrade', (req, socket, head) => {
+            console.log(`${req.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] upgrade ${req.headers['user-agent']}`)
             const id = this.authUser(req)
             if (!id) {
                 return
@@ -62,6 +64,6 @@ export class SocketServer {
         const user = await UserRepo.getActiveUserById(userId)
         const client = new Client(socket, request)
         await client.init()
-        console.log(client.id + ' connected')
+        console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] connect ${user?.id} ${user?.nickname} ${request.headers['user-agent']}`)
     }
 }
