@@ -63,11 +63,11 @@ class SocketServer {
     }
 
     async handleConnect (socket: WebSocket, request: http.IncomingMessage) {
-        const userId = Number(request.headers.userId)
-        const user = await UserRepo.getActiveUserById(userId)
         const client = new Client(socket, request)
         await client.init()
         this.clientMap.set(client.id, client)
+        const userId = Number(request.headers.userId)
+        const user = await UserRepo.getActiveUserById(userId)
         console.log(`${request.headers['x-real-ip']} [${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} connect ${user?.id} ${user?.nickname} ${request.headers['user-agent']}`)
     }
 

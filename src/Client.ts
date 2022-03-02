@@ -29,6 +29,7 @@ export class Client {
     async init () {
         const { document, isNew } = SynchronizationService.getUser(this.userId)
         this.document = document
+        this.controller = new MainController(this)
         document.socketMap.set(this.socket, new Set())
 
         if (isNew) {
@@ -61,7 +62,7 @@ export class Client {
                 }
             }
         }, 30000)
-        this.controller = new MainController(this)
+
         {
             // send sync step 1
             const encoder = encoding.createEncoder()
