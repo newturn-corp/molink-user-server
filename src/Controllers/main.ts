@@ -52,6 +52,7 @@ export class MainController {
             readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
+                console.log('document send')
                 document.send(this.client.socket, encoding.toUint8Array(encoder))
             }
             break
