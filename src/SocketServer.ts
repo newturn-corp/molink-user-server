@@ -40,9 +40,7 @@ class SocketServer {
                 this.server?.emit('connection', ws, req)
             })
         })
-        this.httpServer.listen(env.port, env.host, () => {
-            console.log(`user server start at ${env.port}`)
-        })
+        this.listenServer()
     }
 
     authUser (req: IncomingMessage) {
@@ -75,12 +73,19 @@ class SocketServer {
         this.clientMap.delete(clientId)
     }
 
+    listenServer () {
+        this.httpServer?.listen(env.port, env.host, () => {
+            console.log(`user server start at ${env.port}`)
+        })
+    }
+
     stop () {
         this.isBlockTraffic = true
         const clients = this.clientMap.values()
         for (const client of clients) {
             client.socket.close()
         }
+        this.httpServer?.close()
     }
 }
 export default new SocketServer()
