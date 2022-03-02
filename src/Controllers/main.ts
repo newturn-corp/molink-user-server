@@ -42,6 +42,8 @@ export class MainController {
         switch (messageType) {
         case MessageType.MessageSync: {
             encoding.writeVarUint(encoder, MessageType.MessageSync)
+            const messageType = decoding.readVarUint(decoder)
+            console.log(messageType)
             syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
