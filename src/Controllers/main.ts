@@ -39,6 +39,8 @@ export class MainController {
         this.client.socket.on('pong', () => {
             this.client.pongReceived = true
         })
+
+        this.client.socket.send('listener 설정됨')
     }
 
     handleMessage (message: Uint8Array) {
