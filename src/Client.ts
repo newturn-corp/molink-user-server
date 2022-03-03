@@ -29,8 +29,8 @@ export class Client {
     async init () {
         const { document, isNew } = SynchronizationService.getUser(this.userId)
         this.document = document
-        this.controller = new MainController(this)
         document.socketMap.set(this.socket, new Set())
+        this.controller = new MainController(this)
 
         if (isNew) {
             let user = await UserInfoRepo.getUserInfo(this.userId)

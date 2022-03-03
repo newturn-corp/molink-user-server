@@ -39,8 +39,6 @@ export class MainController {
         this.client.socket.on('pong', () => {
             this.client.pongReceived = true
         })
-
-        this.client.socket.send('listener 설정됨')
     }
 
     handleMessage (message: Uint8Array) {
@@ -51,7 +49,7 @@ export class MainController {
         switch (messageType) {
         case MessageType.MessageSync: {
             encoding.writeVarUint(encoder, MessageType.MessageSync)
-            readSyncMessage(decoder, encoder, document, this.client.socket)
+            syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
                 console.log('document send')
@@ -68,24 +66,4 @@ export class MainController {
         default: throw new Error('unreachable')
         }
     }
-}
-
-export const readSyncMessage = (decoder: any, encoder: any, doc: any, transactionOrigin: any) => {
-    const messageType = decoding.readVarUint(decoder)
-    console.log('read-sync-message')
-    console.log(messageType)
-    switch (messageType) {
-        case messageYjsSyncStep1:
-            readSyncStep1(decoder, encoder, doc)
-            break
-        case messageYjsSyncStep2:
-            readSyncStep2(decoder, doc, transactionOrigin)
-            break
-        case messageYjsUpdate:
-            readUpdate(decoder, doc, transactionOrigin)
-            break
-        default:
-            throw new Error('Unknown message type')
-    }
-    return messageType
 }
