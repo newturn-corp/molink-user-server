@@ -37,7 +37,6 @@ export class SharedDocument extends Y.Doc {
                 if (channelId === this.id) {
                     Y.applyUpdate(this, update, CacheService.subscriber)
                 } else if (channelId === this.awarenessChannel) {
-                    console.log('here')
                     awarenessProtocol.applyAwarenessUpdate(this.awareness, update, CacheService.subscriber)
                 }
             })
@@ -110,7 +109,7 @@ export class SharedDocument extends Y.Doc {
 
             if (this.socketMap.size === 0) {
                 this.destroy()
-                SynchronizationService.deleteHierarchy(this.id)
+                SynchronizationService.deleteUser(this.id)
             }
         }
 

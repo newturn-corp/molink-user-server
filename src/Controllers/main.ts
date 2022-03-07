@@ -7,6 +7,15 @@ import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
 import CacheService from '../Services/CacheService'
 import { SharedDocument } from '../Domain/SharedDocument'
+import moment from "moment-timezone";
+import SocketServer from "../SocketServer";
+import {
+    messageYjsSyncStep1,
+    messageYjsSyncStep2,
+    messageYjsUpdate,
+    readSyncStep1,
+    readSyncStep2, readUpdate
+} from "y-protocols/sync";
 
 export class MainController {
     client: Client
@@ -14,11 +23,14 @@ export class MainController {
     constructor (client: Client) {
         this.client = client
         this.client.socket.on('message', (message: WSData) => {
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} message ${this.client.userId}`)
             this.handleMessage(new Uint8Array(message as ArrayBuffer))
         })
 
-        this.client.socket.on('close', () => {
+        this.client.socket.on('close', async () => {
             this.client.document?.closeWebSocket(this.client.socket)
+            await SocketServer.handleDisconnect(client.id)
+            console.log(`[${moment().format('YYYY-MM-DD HH:mm:ss')}] ${client.id} close ${this.client.userId}`)
             if (this.client.pingInterval) {
                 clearInterval(this.client.pingInterval)
             }
@@ -40,9 +52,9 @@ export class MainController {
             syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
+                console.log('document send')
                 document.send(this.client.socket, encoding.toUint8Array(encoder))
             }
-
             break
         }
         case MessageType.MessageAwareness: {

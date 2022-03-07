@@ -27,19 +27,19 @@ export class Client {
     }
 
     async init () {
-        const { document, isNew } = SynchronizationService.getHierarchy(this.userId)
+        const { document, isNew } = SynchronizationService.getUser(this.userId)
         this.document = document
         document.socketMap.set(this.socket, new Set())
+        this.controller = new MainController(this)
 
         if (isNew) {
-            // 특정 Document에 대한 저장된 Update를 싹 다 가져옴
-            let hierarchy = await UserInfoRepo.getUserInfo(this.userId)
-            if (!hierarchy) {
-                hierarchy = new Y.Doc()
-                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(hierarchy))
+            let user = await UserInfoRepo.getUserInfo(this.userId)
+            if (!user) {
+                user = new Y.Doc()
+                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(user))
             }
 
-            Y.applyUpdate(document, Y.encodeStateAsUpdate(hierarchy))
+            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
         }
 
         this.pingInterval = setInterval(() => {
@@ -62,7 +62,7 @@ export class Client {
                 }
             }
         }, 30000)
-        this.controller = new MainController(this)
+
         {
             // send sync step 1
             const encoder = encoding.createEncoder()

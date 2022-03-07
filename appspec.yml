@@ -28,6 +28,8 @@ hooks:
   BeforeAllowTraffic:
   AfterAllowTraffic:
   BeforeBlockTraffic:
+    - location: infra/scripts/blockServerTraffic.sh
+      runas: ubuntu
   AfterBlockTraffic:
     - location: infra/scripts/zipLogs.sh
       runas: ubuntu
