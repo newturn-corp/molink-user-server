@@ -3,11 +3,12 @@ import { v4 as uuidV4 } from 'uuid'
 import http, { IncomingMessage } from 'http'
 import { Client } from './Client'
 import env from './env'
-import { parseCookie } from '@newturn-develop/molink-utils'
+import { parseCookie, Slack } from '@newturn-develop/molink-utils'
 import jwt from 'jsonwebtoken'
 import { JWTUser } from '@newturn-develop/types-molink'
 import UserRepo from './Repositories/UserRepo'
 import moment from 'moment-timezone'
+import ip from 'ip'
 
 class SocketServer {
     nodeId: string
@@ -41,7 +42,13 @@ class SocketServer {
             })
         })
         this.httpServer?.listen(env.port, env.host, () => {
-            console.log(`user server start at ${env.port}`)
+            try {
+                const msg = `User Server Start\nIP: ${ip.address()}`
+                console.log(msg)
+                Slack.sendTextMessage(msg, env.isProduction ? 'C033BV5JDDG' : 'C033QHV6HU1')
+            } catch (err) {
+                console.log(err)
+            }
         })
     }
 
