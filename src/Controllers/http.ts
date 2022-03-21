@@ -12,10 +12,6 @@ export class MainController {
 
     @Post('/block-traffic')
     async blockTraffic(@Req() req: Request) {
-        console.log(req)
-        // if (body.key !== env.secret.blockTrafficKey) {
-        //     return makeEmptyResponseMessage(401)
-        // }
         SocketServer.stop()
         return makeEmptyResponseMessage(200)
     }
