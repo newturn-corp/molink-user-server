@@ -35,6 +35,10 @@ const env = {
         cookie: process.env.COOKIE_SECRET!,
         blockTrafficKey: process.env.BLOCK_TRAFFIC_KEY!
     },
+    opensearch: {
+        domain: process.env.OPENSEARCH_DOMAIN!,
+        region: process.env.OPENSEARCH_REGION!
+    },
     jwt: process.env.JWT_SECRET!
 }
 

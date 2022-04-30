@@ -1,7 +1,8 @@
-import { JsonController, Get, Post, Req, Body } from 'routing-controllers'
-import { makeEmptyResponseMessage } from '@newturn-develop/types-molink'
-import SocketServer from "../SocketServer";
-import env from "../env";
+import { JsonController, Get, Put, Authorized, CurrentUser, Body } from 'routing-controllers'
+import { makeEmptyResponseMessage, UpdateUserBiographyDTO, User } from '@newturn-develop/types-molink'
+import ProfileService from '../Services/ProfileService'
+import { CustomHttpError } from '../Errors/HttpError'
+import { BiographyLengthExceededError, UserNotExists } from '../Errors/ProfileError'
 
 @JsonController('')
 export class MainController {
@@ -10,10 +11,21 @@ export class MainController {
         return makeEmptyResponseMessage(200)
     }
 
-    @Post('/block-traffic')
-    async blockTraffic(@Req() req: Request) {
-        SocketServer.stop()
-        return makeEmptyResponseMessage(200)
+    @Put('/biography')
+    @Authorized()
+    async setUserBiography (@CurrentUser() user: User, @Body() dto: UpdateUserBiographyDTO) {
+        try {
+            await ProfileService.updateUserBiography(user, dto)
+            return makeEmptyResponseMessage(200)
+        } catch (err) {
+            if (err instanceof UserNotExists) {
+                throw new CustomHttpError(404, 0, '사용자가 존재하지 않습니다.')
+            } else if (err instanceof BiographyLengthExceededError) {
+                throw new CustomHttpError(409, 0, '설명의 길이가 범위를 초과했습니다.')
+            } else {
+                throw err
+            }
+        }
     }
 }
 
