@@ -4,7 +4,7 @@ import SynchronizationService from './SynchoronizationService'
 import { BiographyLengthExceededError, UserNotExists } from '../Errors/ProfileError'
 import UserInfoRepo from '../Repositories/UserInfoRepo'
 import * as Y from 'yjs'
-import { S3Manager } from '@newturn-develop/molink-utils'
+import { getUUID, S3Manager } from '@newturn-develop/molink-utils'
 import env from '../env'
 import UserProfileRepo from '../Repositories/UserProfileRepo'
 
@@ -35,7 +35,7 @@ class ProfileService {
 
     // @ts-ignore
     async updateUserProfileImage (dbUser: User, image: Express.Multer.File) {
-        const url = await S3Manager.uploadImage(env.isProduction ? 'molink-production-profile-image' : 'molink-development-profile-image', `profile-image-${dbUser.id}`, image)
+        const url = await S3Manager.uploadImage(env.isProduction ? 'molink-production-profile-image' : 'molink-development-profile-image', `profile-image-${getUUID()}`, image)
 
         const { document, isNew } = SynchronizationService.getUser(dbUser.id)
         if (isNew) {
@@ -53,7 +53,7 @@ class ProfileService {
         }
 
         await UserProfileRepo.setUserProfileImageUrl(dbUser.id, url)
-        await ESUserRepo.setUserProfileImageUrl(dbUser.id.toString(), toString())
+        await ESUserRepo.setUserProfileImageUrl(dbUser.id.toString(), url)
     }
 }
 export default new ProfileService()
