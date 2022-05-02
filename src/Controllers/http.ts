@@ -1,8 +1,9 @@
-import { JsonController, Get, Put, Authorized, CurrentUser, Body } from 'routing-controllers'
+import { JsonController, Get, Put, Authorized, CurrentUser, Body, UploadedFile, UseBefore } from 'routing-controllers'
 import { makeEmptyResponseMessage, UpdateUserBiographyDTO, User } from '@newturn-develop/types-molink'
 import ProfileService from '../Services/ProfileService'
 import { CustomHttpError } from '../Errors/HttpError'
 import { BiographyLengthExceededError, UserNotExists } from '../Errors/ProfileError'
+import bodyParser from 'body-parser'
 
 @JsonController('')
 export class MainController {
@@ -26,6 +27,15 @@ export class MainController {
                 throw err
             }
         }
+    }
+
+    @Put('/profile-image')
+    @Authorized()
+    @UseBefore(bodyParser.urlencoded({ extended: true }))
+    // eslint-disable-next-line no-undef
+    async setProfileImage (@CurrentUser() user: User, @UploadedFile('image', { required: false }) image: any) {
+        await ProfileService.updateUserProfileImage(user, image)
+        return makeEmptyResponseMessage(200)
     }
 }
 

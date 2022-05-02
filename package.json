@@ -33,7 +33,7 @@
     "eslint-plugin-react": "^7.28.0"
   },
   "dependencies": {
-    "@newturn-develop/molink-utils": "^0.0.35",
+    "@newturn-develop/molink-utils": "^0.0.39",
     "@newturn-develop/types-molink": "^0.0.72",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
