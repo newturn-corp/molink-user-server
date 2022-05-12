@@ -28,6 +28,13 @@ export class FollowController {
         return makeResponseMessage(200, arr)
     }
 
+    @Get('/requested-follows')
+    @Authorized()
+    async getRequestedFollows (@CurrentUser() user: User) {
+        const dto = await FollowService.getRequestedFollows(user)
+        return makeResponseMessage(200, dto)
+    }
+
     @Put('/requests/reject')
     @Authorized()
     async rejectFollowRequest (@CurrentUser() user: User, @Body() dto: RejectFollowRequestDTO) {

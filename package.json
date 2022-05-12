@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@newturn-develop/molink-utils": "^0.0.39",
-    "@newturn-develop/types-molink": "^0.0.80",
+    "@newturn-develop/types-molink": "^0.0.81",
     "cookie-parser": "^1.4.6",
     "crypto": "^1.0.1",
     "dotenv": "^14.3.2",

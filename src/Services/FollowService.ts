@@ -1,17 +1,7 @@
-// import { GetFollowRequestResponseDTO, RejectFollowRequestDTO } from '../Dtos/FollowDTO'
-// import { FollowResponseDTO, UserWithProfileDTO } from '../Dtos/UserDTO'
-// import { UserNotExists } from '../Errors/AuthError'
-// import { AlreadyHandledRequest, FollowRequestNotExists, NotYourFollowRequest } from '../Errors/FollowError'
-// import { AlreadyFollowing, AlreadyFollowRequested } from '../Errors/UserError'
-// import FollowRepo from '../repo/FollowRepo'
-// import FollowRequestRepo from '../repo/FollowRequestRepo'
-// import NotificationRepo from '../repo/NotificationRepo'
-// import { AcceptFollowRequestDTO } from '@newturn-develop/types-molink'
-
 import {
-    AcceptFollowRequestDTO, FollowRequestDTO,
+    AcceptFollowRequestDTO, ESUser, FollowRequestDTO,
     GetFollowMapResponseDTO, GetMyFollowRequestResponseDTO,
-    RejectFollowRequestDTO,
+    RejectFollowRequestDTO, GetRequestedFollowsResponseDTO,
     User
 } from '@newturn-develop/types-molink'
 import SynchronizationService from './SynchoronizationService'
@@ -23,6 +13,7 @@ import moment from 'moment-timezone'
 import FollowRepo from '../Repositories/FollowRepo'
 import FollowRequestRepo from '../Repositories/FollowRequestRepo'
 import UserRepo from '../Repositories/UserRepo'
+import ESUserRepo from '../Repositories/ESUserRepo'
 
 export enum FollowResult {
     Succeeded = 'succeeded',
@@ -47,6 +38,26 @@ class FollowService {
             followRequestMap[followRequest.user_id] = true
         }
         return new GetMyFollowRequestResponseDTO(followRequestMap)
+    }
+
+    async getRequestedFollows (user: User) {
+        const requests = await FollowRequestRepo.getUserActiveFollowRequests(user.id)
+        if (requests.length === 0) {
+            return []
+        }
+        const followers = await ESUserRepo.getUserInfoListByIdList(requests.map(req => req.follower_id))
+        const followerMap = new Map<number, ESUser>()
+        followers.forEach(follower => followerMap.set(Number(follower.id), follower))
+        return new GetRequestedFollowsResponseDTO(requests.map(request => {
+            const follower = followerMap.get(request.follower_id) as ESUser
+            return {
+                id: request.id,
+                profileImgUrl: follower.profileImageUrl,
+                nickname: follower.nickname,
+                isViewed: !!request.viewed_at,
+                createdAt: request.created_at
+            }
+        }))
     }
 
     async rejectFollowRequest (user: User, dto: RejectFollowRequestDTO) {
