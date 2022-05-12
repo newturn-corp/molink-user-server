@@ -1,10 +1,30 @@
-import { JsonController, Authorized, Get, CurrentUser, Body, Put } from 'routing-controllers'
+import { JsonController, Authorized, Get, CurrentUser, Body, Put, Post } from 'routing-controllers'
 import User from '../Domain/User'
 import FollowService from '../Services/FollowService'
-import { AcceptFollowRequestDTO, makeEmptyResponseMessage, RejectFollowRequestDTO } from '@newturn-develop/types-molink'
+import {
+    AcceptFollowRequestDTO,
+    makeEmptyResponseMessage,
+    makeResponseMessage,
+    RejectFollowRequestDTO
+} from '@newturn-develop/types-molink'
 
 @JsonController('/follow')
 export class FollowController {
+    // 내가 팔로우하는 사람들 Map을 가져오는 API
+    @Get('/')
+    @Authorized()
+    async getFollowMap (@CurrentUser() user: User) {
+        const dto = await FollowService.getFollowMap(user)
+        return makeResponseMessage(200, dto)
+    }
+
+    @Get('/requests')
+    @Authorized()
+    async getMyFollowRequestMap (@CurrentUser() user: User) {
+        const arr = await FollowService.getMyActiveFollowRequestMap(user)
+        return makeResponseMessage(200, arr)
+    }
+
     @Put('/requests/reject')
     @Authorized()
     async rejectFollowRequest (@CurrentUser() user: User, @Body() dto: RejectFollowRequestDTO) {
@@ -18,6 +38,25 @@ export class FollowController {
         await FollowService.acceptFollowRequest(user, dto)
         return makeEmptyResponseMessage(200)
     }
+
+    // @Post('/')
+    // @Authorized()
+    // async follow (@CurrentUser() user: User, @Body() { targetId }: { targetId: number }) {
+    //     try {
+    //         const dto = await FollowService.follow(user, targetId)
+    //         return makeResponseMessage(200, dto)
+    //     } catch (err) {
+    //         if (err instanceof UserNotExists) {
+    //             throw new CustomHttpError(404, 1, '사용자가 존재하지 않습니다.')
+    //         } else if (err instanceof AlreadyFollowing) {
+    //             throw new CustomHttpError(409, 1, '이미 팔로우 중입니다.')
+    //         } else if (err instanceof AlreadyFollowRequested) {
+    //             throw new CustomHttpError(409, 2, '이미 팔로우 요청을 했습니다.')
+    //         } else {
+    //             throw err
+    //         }
+    //     }
+    // }
 }
 
 export default FollowController
