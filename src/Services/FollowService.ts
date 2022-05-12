@@ -43,7 +43,7 @@ class FollowService {
     async getRequestedFollows (user: User) {
         const requests = await FollowRequestRepo.getUserActiveFollowRequests(user.id)
         if (requests.length === 0) {
-            return []
+            return new GetRequestedFollowsResponseDTO([])
         }
         const followers = await ESUserRepo.getUserInfoListByIdList(requests.map(req => req.follower_id))
         const followerMap = new Map<number, ESUser>()
