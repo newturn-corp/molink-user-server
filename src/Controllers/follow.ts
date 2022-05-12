@@ -2,11 +2,14 @@ import { JsonController, Authorized, Get, CurrentUser, Body, Put, Post } from 'r
 import User from '../Domain/User'
 import FollowService from '../Services/FollowService'
 import {
-    AcceptFollowRequestDTO,
+    AcceptFollowRequestDTO, FollowRequestDTO,
     makeEmptyResponseMessage,
     makeResponseMessage,
     RejectFollowRequestDTO
 } from '@newturn-develop/types-molink'
+import { UserNotExists } from '../Errors/ProfileError'
+import { CustomHttpError } from '../Errors/HttpError'
+import { AlreadyFollowing, AlreadyFollowRequested } from '../Errors/FollowError'
 
 @JsonController('/follow')
 export class FollowController {
@@ -39,24 +42,24 @@ export class FollowController {
         return makeEmptyResponseMessage(200)
     }
 
-    // @Post('/')
-    // @Authorized()
-    // async follow (@CurrentUser() user: User, @Body() { targetId }: { targetId: number }) {
-    //     try {
-    //         const dto = await FollowService.follow(user, targetId)
-    //         return makeResponseMessage(200, dto)
-    //     } catch (err) {
-    //         if (err instanceof UserNotExists) {
-    //             throw new CustomHttpError(404, 1, '사용자가 존재하지 않습니다.')
-    //         } else if (err instanceof AlreadyFollowing) {
-    //             throw new CustomHttpError(409, 1, '이미 팔로우 중입니다.')
-    //         } else if (err instanceof AlreadyFollowRequested) {
-    //             throw new CustomHttpError(409, 2, '이미 팔로우 요청을 했습니다.')
-    //         } else {
-    //             throw err
-    //         }
-    //     }
-    // }
+    @Post('/')
+    @Authorized()
+    async follow (@CurrentUser() user: User, @Body() dto: FollowRequestDTO) {
+        try {
+            const dto = await FollowService.follow(user, dto)
+            return makeResponseMessage(200, dto)
+        } catch (err) {
+            if (err instanceof UserNotExists) {
+                throw new CustomHttpError(404, 1, '사용자가 존재하지 않습니다.')
+            } else if (err instanceof AlreadyFollowing) {
+                throw new CustomHttpError(409, 1, '이미 팔로우 중입니다.')
+            } else if (err instanceof AlreadyFollowRequested) {
+                throw new CustomHttpError(409, 2, '이미 팔로우 요청을 했습니다.')
+            } else {
+                throw err
+            }
+        }
+    }
 }
 
 export default FollowController

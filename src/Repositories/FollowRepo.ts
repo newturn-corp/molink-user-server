@@ -11,6 +11,11 @@ class FollowRepo extends BaseRepo {
         const queryString = 'INSERT INTO FOLLOW_TB(user_id, following_user_id) VALUES(?, ?)'
         return this._insert(queryString, [userId, followerId])
     }
+
+    checkFollowByUserIdAndFollowerId (userId: number, followerId: number): Promise<Follow[]> {
+        const queryString = 'SELECT * FROM FOLLOW_TB WHERE user_id = ? AND following_user_id = ?'
+        return this._check(queryString, [userId, followerId])
+    }
 }
 
 export default new FollowRepo()

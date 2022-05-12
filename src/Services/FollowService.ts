@@ -9,7 +9,7 @@
 // import { AcceptFollowRequestDTO } from '@newturn-develop/types-molink'
 
 import {
-    AcceptFollowRequestDTO,
+    AcceptFollowRequestDTO, FollowRequestDTO,
     GetFollowMapResponseDTO, GetMyFollowRequestResponseDTO,
     RejectFollowRequestDTO,
     User
@@ -22,6 +22,7 @@ import { AlreadyFollowing, AlreadyFollowRequested } from '../Errors/FollowError'
 import moment from 'moment-timezone'
 import FollowRepo from '../Repositories/FollowRepo'
 import FollowRequestRepo from '../Repositories/FollowRequestRepo'
+import UserRepo from '../Repositories/UserRepo'
 
 export enum FollowResult {
     Succeeded = 'succeeded',
@@ -78,57 +79,31 @@ class FollowService {
         // await NotificationRepo.saveFollowAcceptionNotification(user.id, request.follower_id)
     }
 
-    async follow (dbUser: User, targetId: number) {
-        const { document: requestUser, isNew: isRequestUserNew } = SynchronizationService.getUser(dbUser.id)
-        const { document: targetUser, isNew: isTargetUserNew } = SynchronizationService.getUser(targetId)
-
-        try {
-            // 데이터 로드
-            if (isRequestUserNew) {
-                const user = await UserInfoRepo.getUserInfo(dbUser.id)
-                if (!user) {
-                    throw new UserNotExists()
-                }
-                Y.applyUpdate(requestUser, Y.encodeStateAsUpdate(user))
-            }
-            if (isTargetUserNew) {
-                const user = await UserInfoRepo.getUserInfo(dbUser.id)
-                if (!user) {
-                    throw new UserNotExists()
-                }
-                Y.applyUpdate(targetUser, Y.encodeStateAsUpdate(user))
-            }
-
-            // 이미 팔로우 중인 경우, 처리하지 않는다.
-            const followMap = requestUser.getMap('followList')
-            if (followMap.get(targetId.toString())) {
-                throw new AlreadyFollowing()
-            }
-
-            // 이미 팔로우 요청을 보낸 경우, 처리하지 않는다.
-            const myFollowRequestMap = requestUser.getMap('myFollowRequests')
-            if (myFollowRequestMap.get(targetId.toString())) {
-                throw new AlreadyFollowRequested()
-            }
-
-            const followWithoutApprove = requestUser.getMap('setting').get('followWithoutApprove')
-            if (followWithoutApprove) {
-
-            } else {
-                targetUser.getMap('requestedFollowMap').set(dbUser.id.toString(), {
-
-                    requestedAt: moment().toString()
-                })
-            }
-        } catch (err) {
-            if (requestUser.destoryable) {
-                requestUser.destroy()
-            }
-            if (targetUser.destoryable) {
-                targetUser.destroy()
-            }
-            throw err
+    async follow (dbUser: User, dto: FollowRequestDTO) {
+        const { targetId } = dto
+        const targetUser = await UserRepo.getActiveUserById(targetId)
+        if (!targetUser) {
+            throw new UserNotExists()
         }
+        const isAlreadyFollowing = await FollowRepo.checkFollowByUserIdAndFollowerId(targetId, dbUser.id)
+        if (isAlreadyFollowing) {
+            throw new AlreadyFollowing()
+        }
+        const isAlreadyFollowRequested = await FollowRequestRepo.checkFollowRequestByUserIdAndFollowerId(targetId, dbUser.id)
+        if (isAlreadyFollowRequested) {
+            throw new AlreadyFollowRequested()
+        }
+
+        await FollowRequestRepo.saveFollowRequest(targetId, dbUser.id)
+        // const targetUserSetting = await UserSettingRepo.getUserSetting(targetId)
+        // if (targetUserSetting.follow_without_approve) {
+        //     await FollowRepo.saveFollow(targetId, user.id)
+        //     await NotificationRepo.saveNewFollowNotification(targetId, user.id)
+        //     return new FollowResponseDTO(FollowResult.Succeeded)
+        // } else {
+        //     await FollowRequestRepo.saveFollowRequest(targetId, user.id)
+        //     return new FollowResponseDTO(FollowResult.Requested)
+        // }
     }
 
     // async setActiveFollowRequestsViewedAt (user: User) {
