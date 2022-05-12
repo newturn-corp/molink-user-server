@@ -46,8 +46,8 @@ export class FollowController {
     @Authorized()
     async follow (@CurrentUser() user: User, @Body() dto: FollowRequestDTO) {
         try {
-            const dto = await FollowService.follow(user, dto)
-            return makeResponseMessage(200, dto)
+            await FollowService.follow(user, dto)
+            return makeEmptyResponseMessage(200)
         } catch (err) {
             if (err instanceof UserNotExists) {
                 throw new CustomHttpError(404, 1, '사용자가 존재하지 않습니다.')
