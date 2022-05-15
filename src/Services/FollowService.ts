@@ -8,12 +8,18 @@ import SynchronizationService from './SynchoronizationService'
 import UserInfoRepo from '../Repositories/UserInfoRepo'
 import { UserNotExists } from '../Errors/ProfileError'
 import * as Y from 'yjs'
-import { AlreadyFollowing, AlreadyFollowRequested } from '../Errors/FollowError'
+import {
+    AlreadyFollowing,
+    AlreadyFollowRequested,
+    AlreadyHandledRequest, FollowRequestNotExists,
+    NotYourFollowRequest
+} from '../Errors/FollowError'
 import moment from 'moment-timezone'
 import FollowRepo from '../Repositories/FollowRepo'
 import FollowRequestRepo from '../Repositories/FollowRequestRepo'
 import UserRepo from '../Repositories/UserRepo'
 import ESUserRepo from '../Repositories/ESUserRepo'
+import NotificationRepo from '../Repositories/NotificationRepo'
 
 export enum FollowResult {
     Succeeded = 'succeeded',
@@ -61,33 +67,33 @@ class FollowService {
     }
 
     async rejectFollowRequest (user: User, dto: RejectFollowRequestDTO) {
-        // const request = await FollowRequestRepo.getFollowRequest(dto.followRequestId)
-        // if (!request) {
-        //     throw new FollowRequestNotExists()
-        // }
-        // if (request.user_id !== user.id) {
-        //     throw new NotYourFollowRequest()
-        // }
-        // if (request.accepted_at || request.rejected_at) {
-        //     throw new AlreadyHandledRequest()
-        // }
-        // await FollowRequestRepo.setFollowRequestRejected(request.id)
+        const request = await FollowRequestRepo.getFollowRequest(dto.followRequestId)
+        if (!request) {
+            throw new FollowRequestNotExists()
+        }
+        if (request.user_id !== user.id) {
+            throw new NotYourFollowRequest()
+        }
+        if (request.accepted_at || request.rejected_at) {
+            throw new AlreadyHandledRequest()
+        }
+        await FollowRequestRepo.setFollowRequestRejected(request.id)
     }
 
     async acceptFollowRequest (user: User, dto: AcceptFollowRequestDTO) {
-        // const request = await FollowRequestRepo.getFollowRequest(dto.followRequestId)
-        // if (!request) {
-        //     throw new FollowRequestNotExists()
-        // }
-        // if (request.user_id !== user.id) {
-        //     throw new NotYourFollowRequest()
-        // }
-        // if (request.accepted_at || request.rejected_at) {
-        //     throw new AlreadyHandledRequest()
-        // }
-        // await FollowRequestRepo.setFollowRequestAccepted(request.id)
-        // await FollowRepo.saveFollow(user.id, request.follower_id)
-        // await NotificationRepo.saveFollowAcceptionNotification(user.id, request.follower_id)
+        const request = await FollowRequestRepo.getFollowRequest(dto.followRequestId)
+        if (!request) {
+            throw new FollowRequestNotExists()
+        }
+        if (request.user_id !== user.id) {
+            throw new NotYourFollowRequest()
+        }
+        if (request.accepted_at || request.rejected_at) {
+            throw new AlreadyHandledRequest()
+        }
+        await FollowRequestRepo.setFollowRequestAccepted(request.id)
+        await FollowRepo.saveFollow(user.id, request.follower_id)
+        await NotificationRepo.saveFollowAcceptNotification(user.id, request.follower_id)
     }
 
     async follow (dbUser: User, dto: FollowRequestDTO) {
