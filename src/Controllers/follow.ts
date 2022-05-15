@@ -67,6 +67,13 @@ export class FollowController {
             }
         }
     }
+
+    @Put('/requests/viewed_at')
+    @Authorized()
+    async setFollowRequestsViewedAt (@CurrentUser() user: User) {
+        await FollowService.setActiveFollowRequestsViewedAt(user)
+        return makeEmptyResponseMessage(200)
+    }
 }
 
 export default FollowController

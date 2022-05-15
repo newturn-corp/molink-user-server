@@ -117,8 +117,8 @@ class FollowService {
         // }
     }
 
-    // async setActiveFollowRequestsViewedAt (user: User) {
-    //     await FollowRequestRepo.setActiveFollowRequestsViewedAt(user.id)
-    // }
+    async setActiveFollowRequestsViewedAt (user: User) {
+        await FollowRequestRepo.setActiveFollowRequestsViewedAt(user.id)
+    }
 }
 export default new FollowService()
