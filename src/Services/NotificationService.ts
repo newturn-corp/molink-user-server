@@ -6,7 +6,7 @@ class NotificationService {
     async getActiveNotifications (user: User) {
         const notifications = await NotificationRepo.getActiveNotificationsByUserId(user.id)
         return notifications.map(noti => {
-            return new NotificationInfo(noti.id, noti.caused_user_id, !!noti.viewed_at, noti.created_at)
+            return new NotificationInfo(noti.notification_type, noti.caused_user_id, !!noti.viewed_at, noti.created_at)
         })
     }
 
