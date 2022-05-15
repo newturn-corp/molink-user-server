@@ -9,7 +9,7 @@ class NotificationRepo extends BaseRepo {
 
     public saveFollowAcceptNotification (userId: number, followerId: number) {
         const queryString = 'INSERT INTO NOTIFICATION_TB(user_id, notification_type, caused_user_id) VALUES(?, ?, ?)'
-        return this._insert(queryString, [userId, NotificationType.FollowAccept, followerId])
+        return this._insert(queryString, [followerId, NotificationType.FollowAccept, userId])
     }
 
     async setActiveNotificationViewedAt (userId: number) {
