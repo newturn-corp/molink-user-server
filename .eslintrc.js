@@ -25,5 +25,8 @@ module.exports = {
         'no-unused-vars': 'off',
         'no-useless-constructor': 'off',
         camelcase: 'off'
+    },
+    globals: {
+        Express: true
     }
 }
