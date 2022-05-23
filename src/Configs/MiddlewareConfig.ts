@@ -15,6 +15,7 @@ export function useMiddleware (app: express.Application) {
     const logFormat = ':remote-addr [:date[clf]] ":method :url" :status :res[content-length] - :response-time ms ":user-agent"'
     app.use(
         cors({
+            credentials: true,
             preflightContinue: true,
             origin: env.allow_origin_list.split(',')
         })
