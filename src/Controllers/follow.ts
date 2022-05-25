@@ -1,4 +1,4 @@
-import { JsonController, Authorized, Get, CurrentUser, Body, Put, Post } from 'routing-controllers'
+import { JsonController, Authorized, Get, CurrentUser, Body, Put, Post, Param } from 'routing-controllers'
 import User from '../Domain/User'
 import FollowService from '../Services/FollowService'
 import {
@@ -18,6 +18,20 @@ export class FollowController {
     @Authorized()
     async getFollowMap (@CurrentUser() user: User) {
         const dto = await FollowService.getFollowMap(user)
+        return makeResponseMessage(200, dto)
+    }
+
+    // 나를 팔로우하는 사람들 Map을 가져오는 API
+    @Get('/followers')
+    @Authorized()
+    async getFollowerMap (@CurrentUser() user: User) {
+        const dto = await FollowService.getFollowerMap(user)
+        return makeResponseMessage(200, dto)
+    }
+
+    @Get('/:userId/info')
+    async getFollowInfo (@CurrentUser() user: User, @Param('userId') userId: string) {
+        const dto = await FollowService.getFollowInfo(user, Number(userId))
         return makeResponseMessage(200, dto)
     }
 

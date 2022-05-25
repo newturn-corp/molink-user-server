@@ -2,7 +2,7 @@ import {
     AcceptFollowRequestDTO, ESUser, FollowRequestDTO,
     GetFollowMapResponseDTO, GetMyFollowRequestResponseDTO,
     RejectFollowRequestDTO, GetRequestedFollowsResponseDTO,
-    User
+    User, GetFollowInfoResponseDTO, GetFollowerMapResponseDTO
 } from '@newturn-develop/types-molink'
 import SynchronizationService from './SynchoronizationService'
 import UserInfoRepo from '../Repositories/UserInfoRepo'
@@ -36,6 +36,15 @@ class FollowService {
         return new GetFollowMapResponseDTO(followMap)
     }
 
+    async getFollowerMap (user: User) {
+        const followerMap: any = {}
+        const followers = await FollowRepo.getUserFollowers(user.id)
+        for (const follower of followers) {
+            followerMap[follower.following_user_id] = true
+        }
+        return new GetFollowerMapResponseDTO(followerMap)
+    }
+
     // 내가 요청 중인 팔로우들을 가져오는 API
     async getMyActiveFollowRequestMap (user: User) {
         const followRequestMap: any = {}
@@ -58,12 +67,19 @@ class FollowService {
             const follower = followerMap.get(request.follower_id) as ESUser
             return {
                 id: request.id,
+                followerId: Number(follower.id),
                 profileImgUrl: follower.profileImageUrl,
                 nickname: follower.nickname,
                 isViewed: !!request.viewed_at,
                 createdAt: request.created_at
             }
         }))
+    }
+
+    async getFollowInfo (user: User, targetUserId: number) {
+        const { count: followCount } = await FollowRepo.getUserFollowCount(targetUserId)
+        const { count: followingCount } = await FollowRepo.getUserFollowingCount(targetUserId)
+        return new GetFollowInfoResponseDTO(followCount, followingCount)
     }
 
     async rejectFollowRequest (user: User, dto: RejectFollowRequestDTO) {
