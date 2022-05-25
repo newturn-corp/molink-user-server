@@ -67,6 +67,7 @@ class FollowService {
             const follower = followerMap.get(request.follower_id) as ESUser
             return {
                 id: request.id,
+                followerId: Number(follower.id),
                 profileImgUrl: follower.profileImageUrl,
                 nickname: follower.nickname,
                 isViewed: !!request.viewed_at,
