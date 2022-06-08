@@ -39,6 +39,9 @@ const env = {
         domain: process.env.OPENSEARCH_DOMAIN!,
         region: process.env.OPENSEARCH_REGION!
     },
+    api: {
+        internalKey: process.env.INTERNAL_API_KEY
+    },
     allow_origin_list: process.env.ALLOW_ORIGIN_LIST!,
     jwt: process.env.JWT_SECRET!
 }
