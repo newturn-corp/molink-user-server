@@ -1,4 +1,7 @@
 import { SharedDocument } from '../Domain/SharedDocument'
+import UserInfoRepo from '../Repositories/UserInfoRepo'
+import { UserNotExists } from '../Errors/ProfileError'
+import * as Y from 'yjs'
 
 class SynchronizationService {
     private userMap = new Map<number, SharedDocument>()
@@ -19,6 +22,21 @@ class SynchronizationService {
             document,
             isNew: true
         }
+    }
+
+    async getUserV2 (userId: number) {
+        const {
+            document,
+            isNew
+        } = this.getUser(userId)
+        if (isNew) {
+            const user = await UserInfoRepo.getUserInfo(userId)
+            if (!user) {
+                throw new UserNotExists()
+            }
+            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
+        }
+        return document
     }
 
     deleteUser (userId: number) {
