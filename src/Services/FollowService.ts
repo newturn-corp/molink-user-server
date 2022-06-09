@@ -1,20 +1,24 @@
 import {
-    AcceptFollowRequestDTO, ESUser, FollowRequestDTO,
-    GetFollowMapResponseDTO, GetMyFollowRequestResponseDTO,
-    RejectFollowRequestDTO, GetRequestedFollowsResponseDTO,
-    User, GetFollowInfoResponseDTO, GetFollowerMapResponseDTO
+    AcceptFollowRequestDTO,
+    ESUser,
+    FollowRequestDTO,
+    GetFollowerMapResponseDTO,
+    GetFollowInfoResponseDTO,
+    GetFollowMapResponseDTO,
+    GetMyFollowRequestResponseDTO,
+    GetRequestedFollowsResponseDTO,
+    NotificationType,
+    RejectFollowRequestDTO,
+    User
 } from '@newturn-develop/types-molink'
-import SynchronizationService from './SynchoronizationService'
-import UserInfoRepo from '../Repositories/UserInfoRepo'
 import { UserNotExists } from '../Errors/ProfileError'
-import * as Y from 'yjs'
 import {
     AlreadyFollowing,
     AlreadyFollowRequested,
-    AlreadyHandledRequest, FollowRequestNotExists,
+    AlreadyHandledRequest,
+    FollowRequestNotExists,
     NotYourFollowRequest
 } from '../Errors/FollowError'
-import moment from 'moment-timezone'
 import FollowRepo from '../Repositories/FollowRepo'
 import FollowRequestRepo from '../Repositories/FollowRequestRepo'
 import UserRepo from '../Repositories/UserRepo'
@@ -109,7 +113,16 @@ class FollowService {
         }
         await FollowRequestRepo.setFollowRequestAccepted(request.id)
         await FollowRepo.saveFollow(user.id, request.follower_id)
-        await NotificationRepo.saveFollowAcceptNotification(user.id, request.follower_id)
+        const follower = await UserRepo.getActiveUserById(request.follower_id)
+        if (follower) {
+            await NotificationRepo.saveNotification(
+                user.id,
+                NotificationType.FollowAccept,
+                `<b>${follower.nickname}</b>님이 팔로우 요청을 수락하셨습니다.`,
+                request.follower_id,
+                request.follower_id.toString()
+            )
+        }
     }
 
     async follow (dbUser: User, dto: FollowRequestDTO) {
