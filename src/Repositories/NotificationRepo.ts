@@ -21,5 +21,10 @@ class NotificationRepo extends BaseRepo {
         const queryString = 'UPDATE NOTIFICATION_TB SET checked_at = ? WHERE user_id = ? AND checked_at IS NULL AND viewed_at IS NOT NULL'
         return this._update(queryString, [new Date(), userId])
     }
+
+    public saveNotification (userId: number, notificationType: NotificationType, notificationContent: string, causedUserId: number, additionalInfo: string) {
+        const queryString = 'INSERT INTO NOTIFICATION_TB(user_id, notification_type, notification_content, caused_user_id, additional_info) VALUES(?, ?, ?, ?, ?)'
+        return this._insert(queryString, [userId, notificationType, notificationContent, causedUserId, additionalInfo])
+    }
 }
 export default new NotificationRepo()
