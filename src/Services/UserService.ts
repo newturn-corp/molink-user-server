@@ -20,6 +20,7 @@ export class UserService {
         const userSetting = userInfo.getMap('setting')
         const userEditorSetting = userInfo.getMap('editorSetting')
         const userLimit = userInfo.getMap('limit')
+        userInfo.getArray('blog')
         const userETC = userInfo.getMap('etc')
 
         const biography = ''
