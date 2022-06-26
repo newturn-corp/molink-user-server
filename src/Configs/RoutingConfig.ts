@@ -6,6 +6,7 @@ import { AuthMiddleware } from '../Middlewares/AuthMiddleware'
 import FollowController from '../Controllers/follow'
 import NotificationController from '../Controllers/notifications'
 import { InternalFileUploadController } from '../Controllers/internal/file-upload'
+import { InternalController } from '../Controllers/internal/http'
 
 const routingControllersOptions: RoutingControllersOptions = {
     defaultErrorHandler: false,
@@ -14,7 +15,8 @@ const routingControllersOptions: RoutingControllersOptions = {
         MainController,
         FollowController,
         NotificationController,
-        InternalFileUploadController
+        InternalFileUploadController,
+        InternalController
     ],
     authorizationChecker: AuthMiddleware.authorization,
     currentUserChecker: AuthMiddleware.currentUser

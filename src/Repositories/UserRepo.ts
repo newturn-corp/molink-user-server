@@ -11,6 +11,11 @@ class UserRepo extends BaseRepo {
         const queryString = 'SELECT * FROM USER_TB WHERE is_deleted = 0'
         return this._selectPlural(queryString, [])
     }
+
+    saveUser (email: string, nickname: string, pwd: string, pwdSalt: string, isAcceptMarketing: boolean): Promise<number> {
+        const queryString = 'INSERT INTO USER_TB(email, nickname, pwd, pwd_salt, is_accept_marketing) VALUES(?, ?, ?, ?, ?)'
+        return this._insert(queryString, [email, nickname, pwd, pwdSalt, Number(isAcceptMarketing)])
+    }
 }
 
 export default new UserRepo()

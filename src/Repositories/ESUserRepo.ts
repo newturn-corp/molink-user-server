@@ -27,5 +27,18 @@ class ESUserRepo {
             return this.rawSourceToUser(id, source)
         }) as ESUser[]
     }
+
+    private async _saveUser (userId: number, obj: any) {
+        const id = await OpenSearch.insert('molink-user', 'user', obj, userId.toString()) as string
+        return id
+    }
+
+    public saveUser (userId: number, nickname: string, biography: string, profileImageUrl: string) {
+        return this._saveUser(userId, {
+            nickname,
+            biography,
+            profileImageUrl
+        })
+    }
 }
 export default new ESUserRepo()

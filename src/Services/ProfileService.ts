@@ -33,27 +33,27 @@ class ProfileService {
         await ESUserRepo.setUserBiography(dbUser.id.toString(), dto.biography)
     }
 
-    // @ts-ignore
-    async updateUserProfileImage (dbUser: User, image: Express.Multer.File) {
+    updateUserProfileImageInternal (userID: number, image: Express.Multer.File) {
+        return this._updateUserProfileImage(userID, image)
+    }
+
+    updateUserProfileImage (user: User, image: Express.Multer.File) {
+        return this._updateUserProfileImage(user.id, image)
+    }
+
+    async _updateUserProfileImage (userID: number, image: Express.Multer.File) {
         const url = await S3Manager.uploadImage(env.isProduction ? 'molink-production-profile-image' : 'molink-development-profile-image', `profile-image-${getUUID()}`, image)
 
-        const { document, isNew } = SynchronizationService.getUser(dbUser.id)
-        if (isNew) {
-            const user = await UserInfoRepo.getUserInfo(dbUser.id)
-            if (!user) {
-                throw new UserNotExists()
-            }
-            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
-        }
-        document.transact(() => {
-            document.getMap('profile').set('profileImageUrl', url)
+        const liveUser = await SynchronizationService.getUserV2(userID)
+        liveUser.transact(() => {
+            liveUser.getMap('profile').set('profileImageUrl', url)
         }, 'server')
-        if (document.destoryable) {
-            document.destroy()
+        if (liveUser.destoryable) {
+            liveUser.destroy()
         }
 
-        await UserProfileRepo.setUserProfileImageUrl(dbUser.id, url)
-        await ESUserRepo.setUserProfileImageUrl(dbUser.id.toString(), url)
+        await UserProfileRepo.setUserProfileImageUrl(userID, url)
+        await ESUserRepo.setUserProfileImageUrl(userID.toString(), url)
     }
 }
 export default new ProfileService()
