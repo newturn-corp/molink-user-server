@@ -3,14 +3,14 @@ import { getKnexClient } from '@newturn-develop/molink-utils'
 import env from '../env'
 import * as Y from 'yjs'
 
-interface HierarchyUpdate {
+interface UserInfoUpdate {
     id: string;
     userId: number;
     update: Uint8Array;
 }
 
 class UserInfoRepo {
-    client: Knex<HierarchyUpdate>
+    client: Knex<UserInfoUpdate>
 
     constructor () {
         this.client = getKnexClient('pg', env.postgre.host, env.postgre.user, env.postgre.password, env.postgre.name)
@@ -18,7 +18,7 @@ class UserInfoRepo {
 
     async getUserInfo (userId: number) {
         const updates = await this.client.transaction(async (transaction) => {
-            const updates = await this.client<HierarchyUpdate>('items').transacting(transaction).where('userId', userId).forUpdate().orderBy('id')
+            const updates = await this.client<UserInfoUpdate>('items').transacting(transaction).where('userId', userId).forUpdate().orderBy('id')
 
             if (updates.length >= 50) {
                 const dbYDoc = new Y.Doc()
@@ -30,8 +30,8 @@ class UserInfoRepo {
                 })
 
                 const [mergedUpdates] = await Promise.all([
-                    this.client<HierarchyUpdate>('items').transacting(transaction).insert({ userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
-                    this.client<HierarchyUpdate>('items').transacting(transaction).where('userId', userId).whereIn('id', updates.map(({ id }) => id)).delete()
+                    this.client<UserInfoUpdate>('items').transacting(transaction).insert({ userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
+                    this.client<UserInfoUpdate>('items').transacting(transaction).where('userId', userId).whereIn('id', updates.map(({ id }) => id)).delete()
                 ])
 
                 return mergedUpdates
