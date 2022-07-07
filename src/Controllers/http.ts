@@ -1,8 +1,18 @@
-import { JsonController, Get, Put, Authorized, CurrentUser, Body, UploadedFile, UseBefore } from 'routing-controllers'
+import {
+    JsonController,
+    Get,
+    Put,
+    Authorized,
+    CurrentUser,
+    Body,
+    UploadedFile,
+    UseBefore,
+    Post
+} from 'routing-controllers'
 import {
     GetUserIDDTO,
     makeEmptyResponseMessage,
-    makeResponseMessage,
+    makeResponseMessage, SaveSupportDTO,
     UpdateUserBiographyDTO,
     User
 } from '@newturn-develop/types-molink'
@@ -10,6 +20,7 @@ import ProfileService from '../Services/ProfileService'
 import { CustomHttpError } from '../Errors/HttpError'
 import { BiographyLengthExceededError, UserNotExists } from '../Errors/ProfileError'
 import bodyParser from 'body-parser'
+import SupportService from '../Services/SupportService'
 
 @JsonController('')
 export class MainController {
@@ -22,6 +33,13 @@ export class MainController {
     @Authorized()
     async getUserID (@CurrentUser() user: User) {
         return makeResponseMessage(200, new GetUserIDDTO(user.id))
+    }
+
+    @Post('/supports')
+    @Authorized()
+    async saveSupports (@CurrentUser() user: User, @Body() dto: SaveSupportDTO) {
+        await SupportService.saveSupport(user, dto)
+        return makeEmptyResponseMessage(201)
     }
 
     @Put('/biography')
