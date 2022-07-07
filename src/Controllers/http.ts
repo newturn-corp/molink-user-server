@@ -1,5 +1,11 @@
 import { JsonController, Get, Put, Authorized, CurrentUser, Body, UploadedFile, UseBefore } from 'routing-controllers'
-import { makeEmptyResponseMessage, UpdateUserBiographyDTO, User } from '@newturn-develop/types-molink'
+import {
+    GetUserIDDTO,
+    makeEmptyResponseMessage,
+    makeResponseMessage,
+    UpdateUserBiographyDTO,
+    User
+} from '@newturn-develop/types-molink'
 import ProfileService from '../Services/ProfileService'
 import { CustomHttpError } from '../Errors/HttpError'
 import { BiographyLengthExceededError, UserNotExists } from '../Errors/ProfileError'
@@ -10,6 +16,12 @@ export class MainController {
     @Get('/health-check')
     async checkServerStatus () {
         return makeEmptyResponseMessage(200)
+    }
+
+    @Get('/id')
+    @Authorized()
+    async getUserID (@CurrentUser() user: User) {
+        return makeResponseMessage(200, new GetUserIDDTO(user.id))
     }
 
     @Put('/biography')

@@ -1,6 +1,7 @@
 import { JsonController, Authorized, Get, CurrentUser, Body, Put, Post } from 'routing-controllers'
 import User from '../Domain/User'
 import {
+    GetUserIDDTO,
     makeEmptyResponseMessage,
     makeResponseMessage
 } from '@newturn-develop/types-molink'
