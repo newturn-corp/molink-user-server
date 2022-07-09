@@ -32,16 +32,6 @@ export class Client {
         document.socketMap.set(this.socket, new Set())
         this.controller = new MainController(this)
 
-        if (isNew) {
-            let user = await UserInfoRepo.getUserInfo(this.userId)
-            if (!user) {
-                user = new Y.Doc()
-                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(user))
-            }
-
-            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
-        }
-
         this.pingInterval = setInterval(() => {
             if (!this.pongReceived) {
                 if (document.socketMap.has(this.socket)) {
@@ -78,6 +68,16 @@ export class Client {
                 encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(document.awareness, Array.from(awarenessStates.keys())))
                 document.send(this.socket, encoding.toUint8Array(encoder))
             }
+        }
+
+        if (isNew) {
+            let user = await UserInfoRepo.getUserInfo(this.userId)
+            if (!user) {
+                user = new Y.Doc()
+                await UserInfoRepo.persistUserInfoUpdate(this.userId, Y.encodeStateAsUpdate(user))
+            }
+
+            Y.applyUpdate(document, Y.encodeStateAsUpdate(user))
         }
     }
 }
