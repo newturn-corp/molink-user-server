@@ -5,7 +5,7 @@ import * as Y from 'yjs'
 
 interface UserInfoUpdate {
     id: string;
-    userId: number;
+    userID: number;
     update: Uint8Array;
 }
 
@@ -18,7 +18,7 @@ class UserInfoRepo {
 
     async getUserInfo (userId: number) {
         const updates = await this.client.transaction(async (transaction) => {
-            const updates = await this.client<UserInfoUpdate>('items').transacting(transaction).where('userId', userId).forUpdate().orderBy('id')
+            const updates = await this.client<UserInfoUpdate>('user').transacting(transaction).where('userID', userId).forUpdate().orderBy('id')
 
             if (updates.length >= 50) {
                 const dbYDoc = new Y.Doc()
@@ -30,8 +30,8 @@ class UserInfoRepo {
                 })
 
                 const [mergedUpdates] = await Promise.all([
-                    this.client<UserInfoUpdate>('items').transacting(transaction).insert({ userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
-                    this.client<UserInfoUpdate>('items').transacting(transaction).where('userId', userId).whereIn('id', updates.map(({ id }) => id)).delete()
+                    this.client<UserInfoUpdate>('user').transacting(transaction).insert({ userID: userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
+                    this.client<UserInfoUpdate>('user').transacting(transaction).where('userID', userId).whereIn('id', updates.map(({ id }) => id)).delete()
                 ])
 
                 return mergedUpdates
@@ -51,8 +51,8 @@ class UserInfoRepo {
         return document
     }
 
-    async persistUserInfoUpdate (userId: number, update: Uint8Array) {
-        await this.client('items').insert({ userId, update })
+    async persistUserInfoUpdate (userID: number, update: Uint8Array) {
+        await this.client('user').insert({ userID, update })
     }
 }
 
