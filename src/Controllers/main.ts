@@ -7,15 +7,15 @@ import * as awarenessProtocol from 'y-protocols/awareness'
 import * as syncProtocol from 'y-protocols/sync'
 import CacheService from '../Services/CacheService'
 import { SharedDocument } from '../Domain/SharedDocument'
-import moment from "moment-timezone";
-import SocketServer from "../SocketServer";
+import moment from 'moment-timezone'
+import SocketServer from '../SocketServer'
 import {
     messageYjsSyncStep1,
     messageYjsSyncStep2,
     messageYjsUpdate,
     readSyncStep1,
     readSyncStep2, readUpdate
-} from "y-protocols/sync";
+} from 'y-protocols/sync'
 
 export class MainController {
     client: Client
@@ -52,7 +52,6 @@ export class MainController {
             syncProtocol.readSyncMessage(decoder, encoder, document, this.client.socket)
 
             if (encoding.length(encoder) > 1) {
-                console.log('document send')
                 document.send(this.client.socket, encoding.toUint8Array(encoder))
             }
             break

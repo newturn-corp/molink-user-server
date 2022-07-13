@@ -5,7 +5,7 @@ import * as Y from 'yjs'
 
 interface UserInfoUpdate {
     id: string;
-    userId: number;
+    userID: number;
     update: Uint8Array;
 }
 
@@ -30,7 +30,7 @@ class UserInfoRepo {
                 })
 
                 const [mergedUpdates] = await Promise.all([
-                    this.client<UserInfoUpdate>('user').transacting(transaction).insert({ userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
+                    this.client<UserInfoUpdate>('user').transacting(transaction).insert({ userID: userId, update: Y.encodeStateAsUpdate(dbYDoc) }).returning('*'),
                     this.client<UserInfoUpdate>('user').transacting(transaction).where('userID', userId).whereIn('id', updates.map(({ id }) => id)).delete()
                 ])
 
@@ -51,8 +51,8 @@ class UserInfoRepo {
         return document
     }
 
-    async persistUserInfoUpdate (userId: number, update: Uint8Array) {
-        await this.client('user').insert({ userId, update })
+    async persistUserInfoUpdate (userID: number, update: Uint8Array) {
+        await this.client('user').insert({ userID, update })
     }
 }
 
